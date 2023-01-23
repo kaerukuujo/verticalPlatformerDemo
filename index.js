@@ -15,30 +15,52 @@ for(let i = 0; i < floorCollisions.length; i += 36){
 }
 
 const collisionBlocks = [];
-floorCollisions2D.forEach((row) => {
-    row.forEach((symbol) => {
+floorCollisions2D.forEach((row, y) => {
+    row.forEach((symbol, x) => {
         if(symbol === 202){
             console.log('draw a block');
             collisionBlocks.push(new CollisionBlock({
                 position: {
-                    x: 0, 
-                    y: 0
+                    x: x * 16, 
+                    y: y * 16,
                 },
             })
           )
         }
     })
-})
+});
+
+const platformCollisions2D = [];
+for(let i = 0; i < platformCollisions.length; i += 36){
+    platformCollisions2D.push(platformCollisions.slice(i, i + 36))
+};
+
+const platformCollisionBlocks = [];
+platformCollisions2D.forEach((row, y) => {
+    row.forEach((symbol, x) => {
+        if(symbol === 202){
+            console.log('draw a block');
+            platformCollisionBlocks.push(new CollisionBlock({
+                position: {
+                    x: x * 16, 
+                    y: y * 16,
+                },
+            })
+          )
+        }
+    })
+});
+
+
 
 const gravity = 0.5;
 
 const player = new Player({
-    x: 0, 
-    y: 0
-});
-const player2 = new Player({
-    x: 200, 
-    y: 0
+    position: {
+        x: 0, 
+        y: 0,
+    },
+    collisionBlocks,
 });
 
 const background = new Sprite({
@@ -60,6 +82,7 @@ const keys = {
         pressed: false,
     },
 }
+
 function animate() {
     let animationId = window.requestAnimationFrame(animate);
     // console.log(animationId);
@@ -71,19 +94,29 @@ function animate() {
     c.scale(4, 4);
     c.translate(0, -background.image.height + scaledCanvas.height)
     background.update();
-    c.restore();
+
+    collisionBlocks.forEach(collisionBlock => {
+        collisionBlock.update();
+    });
+
+    platformCollisionBlocks.forEach(block => {
+        block.update();
+    });
 
     player.update();
-    player2.update();
 
     player.velocity.x = 0;
     if(keys.d.pressed) player.velocity.x = 5;
     else if (keys.a.pressed) player.velocity.x = -5;
+
+    c.restore();    
+
+    
 }
 
 animate();
 
-addEventListener('keydown', (event) => {
+window.addEventListener('keydown', (event) => {
     // console.log(event.key);
     switch(event.key) {
         case 'd':
@@ -93,11 +126,11 @@ addEventListener('keydown', (event) => {
             keys.a.pressed = true;
             break;
         case 'w': 
-            player.velocity.y = -20;
+            player.velocity.y = -8;
             break;
     }
 });
-addEventListener('keyup', (event) => {
+window.addEventListener('keyup', (event) => {
     // console.log(event.key);
     switch(event.key) {
         case 'd':
