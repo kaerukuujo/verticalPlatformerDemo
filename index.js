@@ -52,9 +52,7 @@ platformCollisions2D.forEach((row, y) => {
     })
 });
 
-
-
-const gravity = 0.5;
+const gravity = 0.1;
 
 const player = new Player({
     position: {
@@ -129,6 +127,13 @@ const keys = {
     },
 }
 
+const camera = {
+    position: {
+        x: 0, 
+        y: 0,
+    },
+}
+
 function animate() {
     let animationId = window.requestAnimationFrame(animate);
     // console.log(animationId);
@@ -138,7 +143,7 @@ function animate() {
 
     c.save();
     c.scale(4, 4);
-    c.translate(0, -background.image.height + scaledCanvas.height)
+    c.translate(camera.position.x, -background.image.height + scaledCanvas.height)
     background.update();
 
     collisionBlocks.forEach(collisionBlock => {
@@ -149,6 +154,7 @@ function animate() {
         block.update();
     });
 
+    player.checkForHorizontalCanvasCollision();
     player.update();
 
     player.velocity.x = 0;
@@ -156,10 +162,12 @@ function animate() {
         player.switchSprite('Run');
         player.velocity.x = 2;
         player.lastDirection = 'right';
+        player.shouldPanCameraToTheLeft({canvas, camera});
     } else if (keys.a.pressed) {
         player.switchSprite('RunLeft');
         player.velocity.x = -2;
         player.lastDirection = 'left';
+        player.shouldPanCameraToTheRight({canvas, camera});
     } else if (player.velocity.y === 0) {
         if(player.lastDirection === 'right') player.switchSprite('Idle');
         else player.switchSprite('IdleLeft');
@@ -189,7 +197,7 @@ window.addEventListener('keydown', (event) => {
             keys.a.pressed = true;
             break;
         case 'w': 
-            player.velocity.y = -8;
+            player.velocity.y = -5;
             break;
     }
 });
